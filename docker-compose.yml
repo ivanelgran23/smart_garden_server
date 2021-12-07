@@ -1,0 +1,48 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  web:
+    build: ./web
+    volumes:
+      - ./web:/app
+    expose:
+      - 8000
+    env_file:
+      - database.env
+    environment:
+      TZ: "Europe/Budapest"
+    depends_on:
+      - database
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fastapi.rule=HostRegexp(`{host:.+}`)"
+
+  database:
+    image: "postgres" # use latest official postgres version
+    container_name: postgres_container
+    ports:
+      - "5432:5432"
+    environment:
+      TZ: "Europe/Budapest"
+    env_file:
+      - database.env # configure postgres
+    volumes:
+      - database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+    restart: unless-stopped
+
+  traefik: #
+    image: traefik:v2.2
+    ports:
+      - 8008:80
+      - 8081:8080
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Budapest"
+    volumes:
+      - "./traefik/traefik.dev.toml:/etc/traefik/traefik.toml"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+volumes:
+  database-data: # named volumes can be managed easier using docker-compose
