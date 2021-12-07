@@ -6,4 +6,8 @@ It includes an API for receiving and downloading data from the garden, as well a
 
 There is also a PostgreSQL database for storing intermediate data
 
+To start server simply run:
+
+`docker-compose up --build`
+
 ELTE 2021
